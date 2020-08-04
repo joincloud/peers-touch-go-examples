@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/joincloud/peers-touch-go/pubsub"
+	"strconv"
 	"time"
 
+	"github.com/joincloud/peers-touch-go/logger"
 	"github.com/joincloud/peers-touch-go/node"
+	"github.com/joincloud/peers-touch-go/pubsub"
+
+	_ "github.com/joincloud/peers-touch-go/logger/logrus"
 )
 
 var (
@@ -20,10 +24,12 @@ func main() {
 		panic(err)
 	}
 
-	go Sub(n.Broker())
+	Sub(n.Broker())
 	go func() {
+		i := 1
 		for {
-			Pub(n.Broker())
+			Pub(i, n.Broker())
+			i++
 			time.Sleep(time.Second)
 		}
 	}()
@@ -34,8 +40,14 @@ func main() {
 	}
 }
 
-func Pub(broker pubsub.Broker) {
-	err := broker.Pub(context.Background(), pubsub.NewEvent(topic, []byte("Hello, Suber")))
+func Pub(idx int, broker pubsub.Broker) {
+	// todo codec
+	err := broker.Pub(context.Background(), pubsub.NewEvent(topic, pubsub.Message{
+		Header: map[string]string{
+			"idx": strconv.Itoa(idx),
+		},
+		Body: []byte("Hello, Suber"),
+	}))
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +55,7 @@ func Pub(broker pubsub.Broker) {
 
 func Sub(broker pubsub.Broker) {
 	_, err := broker.Sub(context.Background(), topic, func(event pubsub.Event) {
-		fmt.Printf("%s: %s\n", topic, event.Message())
+		logger.Infof("msg handler, topic: %s: msg: %s", topic, string(event.Message().Body))
 	})
 	if err != nil {
 		panic(err)
