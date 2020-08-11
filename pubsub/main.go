@@ -10,6 +10,8 @@ import (
 	"github.com/joincloud/peers-touch-go/node"
 	"github.com/joincloud/peers-touch-go/pubsub"
 
+	// use json codec
+	_ "github.com/joincloud/peers-touch-go/codec/json"
 	_ "github.com/joincloud/peers-touch-go/logger/logrus"
 )
 
@@ -41,12 +43,11 @@ func main() {
 }
 
 func Pub(idx int, broker pubsub.Broker) {
-	// todo codec
 	err := broker.Pub(context.Background(), pubsub.NewEvent(topic, pubsub.Message{
 		Header: map[string]string{
 			"idx": strconv.Itoa(idx),
 		},
-		Body: []byte("Hello, Suber"),
+		Body: "Hello, Suber",
 	}))
 	if err != nil {
 		panic(err)
@@ -55,7 +56,7 @@ func Pub(idx int, broker pubsub.Broker) {
 
 func Sub(broker pubsub.Broker) {
 	_, err := broker.Sub(context.Background(), topic, func(event pubsub.Event) {
-		logger.Infof("msg handler, topic: %s: msg: %s", topic, string(event.Message().Body))
+		logger.Infof("msg handler, topic: %s: msg: %s", topic, event.Message().Body)
 	})
 	if err != nil {
 		panic(err)
