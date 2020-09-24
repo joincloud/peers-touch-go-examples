@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/libp2p/go-libp2p"
 	"strconv"
 	"time"
 
-	"github.com/joincloud/examples/common"
 	"github.com/joincloud/peers-touch-go/logger"
 	"github.com/joincloud/peers-touch-go/node"
 	"github.com/joincloud/peers-touch-go/pubsub"
@@ -25,15 +25,15 @@ func main() {
 	// Cancelling it will stop the the host.
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	host, _ := common.NewNATHost(ctx)
+	host, _ := libp2p.New(ctx)
 	n, err := node.NewNode(ctx, node.Host(host))
 	if err != nil {
 		panic(err)
 	}
 
-	logger.Infof("id: %d", n.ID())
+	logger.Infof("id: %s", n.ID())
 
-	_, err = n.Broker().Sub(context.Background(), topic, func(event pubsub.Event) {
+	_, err = n.Broker().Sub(ctx, topic, func(event pubsub.Event) {
 		logger.Infof("msg handler, topic: %s: msg: %s", topic, event.Message().Body)
 	})
 	if err != nil {
@@ -43,7 +43,7 @@ func main() {
 	go func() {
 		i := 1
 		for {
-			err := n.Broker().Pub(context.Background(), pubsub.NewEvent(topic, pubsub.Message{
+			err := n.Broker().Pub(ctx, pubsub.NewEvent(topic, pubsub.Message{
 				Header: map[string]string{
 					"idx": strconv.Itoa(i),
 				},
@@ -58,7 +58,7 @@ func main() {
 	}()
 
 	select {
-	case <-time.After(3 * time.Second):
+	case <-time.After(300 * time.Second):
 		fmt.Println("timeout 2")
 	}
 }
