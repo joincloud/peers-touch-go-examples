@@ -2,15 +2,10 @@ module github.com/joincloud/examples
 
 go 1.14
 
-replace (
-	github.com/joincloud/peers-touch-go v1.0.0 => ../peers-touch-go
-	github.com/libp2p/go-libp2p v0.9.6 => ../go-libp2p
-	github.com/libp2p/go-libp2p-core v0.6.1 => ../go-libp2p-core
-	github.com/ipfs/go-ipfs v0.6.0 => ../go-ipfs
-	github.com/libp2p/go-libp2p-pubsub v0.3.0 => ../go-libp2p-pubsub
-)
+replace github.com/joincloud/peers-touch-go v1.0.0 => ../peers-touch-go
 
 require (
+	github.com/gdamore/tcell v1.4.0 // indirect
 	github.com/joincloud/peers-touch-go v1.0.0
 	github.com/libp2p/go-libp2p v0.9.6
 	github.com/libp2p/go-libp2p-autonat v0.3.2
@@ -21,4 +16,5 @@ require (
 	github.com/libp2p/go-libp2p-routing v0.0.1
 	github.com/libp2p/go-libp2p-secio v0.2.2
 	github.com/libp2p/go-libp2p-tls v0.1.3
+	github.com/rivo/tview v0.0.0-20201018122409-d551c850a743 // indirect
 )

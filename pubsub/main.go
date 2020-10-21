@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/libp2p/go-libp2p"
+	ma "github.com/multiformats/go-multiaddr"
 	"strconv"
 	"time"
 
 	"github.com/joincloud/peers-touch-go/logger"
 	"github.com/joincloud/peers-touch-go/node"
 	"github.com/joincloud/peers-touch-go/pubsub"
-
+	"github.com/libp2p/go-libp2p"
 	// use json codec
 	_ "github.com/joincloud/peers-touch-go/codec/json"
 	_ "github.com/joincloud/peers-touch-go/logger/logrus"
@@ -25,7 +25,9 @@ func main() {
 	// Cancelling it will stop the the host.
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	host, _ := libp2p.New(ctx)
+
+	listen, _ := ma.NewMultiaddr(fmt.Sprintf("/ip4/127.0.0.1/tcp/%d", 8899))
+	host, _ := libp2p.New(ctx, libp2p.ListenAddrs(listen))
 	n, err := node.NewNode(ctx, node.Host(host))
 	if err != nil {
 		panic(err)
