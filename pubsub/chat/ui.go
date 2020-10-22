@@ -1,4 +1,4 @@
-package chat
+package main
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ func NewChatUI(ch *pubsub.Channel) *ChatUI {
 	msgBox := tview.NewTextView()
 	msgBox.SetDynamicColors(true)
 	msgBox.SetBorder(true)
-	msgBox.SetTitle(fmt.Sprintf("Room: %s", ch.Name))
+	msgBox.SetTitle(fmt.Sprintf("Room: %s", ch.Name()))
 
 	// text views are io.Writers, but they don't automatically refresh.
 	// this sets a change handler to force the app to redraw when we get
@@ -47,7 +47,7 @@ func NewChatUI(ch *pubsub.Channel) *ChatUI {
 	// an input field for typing messages into
 	inputCh := make(chan string, 32)
 	input := tview.NewInputField().
-		SetLabel(ch.nick + " > ").
+		SetLabel(ch.Metadata()["nickName"] + " > ").
 		SetFieldWidth(0).
 		SetFieldBackgroundColor(tcell.ColorBlack)
 
@@ -134,14 +134,14 @@ func (ui *ChatUI) refreshPeers() {
 // displayChatMessage writes a ChatMessage from the room to the message window,
 // with the sender's nick highlighted in green.
 func (ui *ChatUI) displayChatMessage(cm *pubsub.Message) {
-	prompt := withColor("green", fmt.Sprintf("<%s>:", cm.SenderNick))
-	fmt.Fprintf(ui.msgW, "%s %s\n", prompt, cm.Message)
+	prompt := withColor("green", fmt.Sprintf("<%s>:", cm.Header["nickName"]))
+	fmt.Fprintf(ui.msgW, "%s %s\n", prompt, cm.Body)
 }
 
 // displaySelfMessage writes a message from ourself to the message window,
 // with our nick highlighted in yellow.
 func (ui *ChatUI) displaySelfMessage(msg string) {
-	prompt := withColor("yellow", fmt.Sprintf("<%s>:", ui.ch.nick))
+	prompt := withColor("yellow", fmt.Sprintf("<%s>:", ui.ch.Metadata()["nickName"]))
 	fmt.Fprintf(ui.msgW, "%s %s\n", prompt, msg)
 }
 
@@ -170,7 +170,7 @@ func (ui *ChatUI) handleEvents() {
 			// refresh the list of peers in the chat room periodically
 			ui.refreshPeers()
 
-		case <-ui.ch.ctx.Done():
+		case <-ui.ch.Ctx().Done():
 			return
 
 		case <-ui.doneCh:

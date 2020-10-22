@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	ma "github.com/multiformats/go-multiaddr"
 	"strconv"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/joincloud/peers-touch-go/node"
 	"github.com/joincloud/peers-touch-go/pubsub"
 	"github.com/libp2p/go-libp2p"
+	ma "github.com/multiformats/go-multiaddr"
 	// use json codec
 	_ "github.com/joincloud/peers-touch-go/codec/json"
 	_ "github.com/joincloud/peers-touch-go/logger/logrus"
@@ -32,8 +32,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	logger.Infof("id: %s", n.ID())
 
 	_, err = n.Broker().Sub(ctx, topic, func(event pubsub.Event) {
 		logger.Infof("msg handler, topic: %s: msg: %s", topic, event.Message().Body)
